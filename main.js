@@ -93,7 +93,6 @@ app.post('/topic/update_process', (request, response) => {
 
 app.post('/topic/delete_process', (request,response) => {
   var post = request.body;
-  var post = qs.parse(body);
   var id = post.id;
   var filteredId = path.parse(id).base;
   fs.unlink(`data/${filteredId}`, function(error){
