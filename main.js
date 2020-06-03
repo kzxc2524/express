@@ -5,12 +5,14 @@ var path = require('path');
 var qs = require('querystring');
 var bodyParser = require('body-parser') 
 // 넘겨받은 데이터를 처리하는 미들웨어 request.on('data'), request.on('end') 대체
-
+var compression = require('compression')
+//리소스를 압축형태로 만드는 미들웨어
 var template = require('./lib/template.js');
 var sanitizeHtml = require('sanitize-html');
 
 
-app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(compression());
 
 app.get('/', (request, response) => {
   fs.readdir('./data', function (error, filelist) {
