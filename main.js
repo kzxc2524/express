@@ -108,41 +108,54 @@ app.post('/topic/delete_process', (request,response) => {
   })
 });
 
-app.get('/topic/:topicId', (request, response) => {
+app.get('/topic/:topicId', (request, response, next) => {
     var filteredId = path.parse(request.params.topicId).base;
     fs.readFile(`data/${filteredId}`, 'utf8', function(err, description){
-      var title = request.params.topicId;
-      var sanitizedTitle = sanitizeHtml(title);
-      var sanitizedDescription = sanitizeHtml(description, {
-        allowedTags:['h1']
-      });
-      var list = template.list(request.list);
-      var html = template.HTML(sanitizedTitle, list,
-        `<h2>${sanitizedTitle}</h2>${sanitizedDescription}`,
-        ` <a href="/topic/create">create</a>
+      if(err){
+        next(err); //에러가 있을때 err 데이터를 던져줌
+      }else{
+        var title = request.params.topicId;
+        var sanitizedTitle = sanitizeHtml(title);
+        var sanitizedDescription = sanitizeHtml(description, {
+          allowedTags: ['h1']
+        });
+        var list = template.list(request.list);
+        var html = template.HTML(sanitizedTitle, list,
+          `<h2>${sanitizedTitle}</h2>${sanitizedDescription}`,
+          ` <a href="/topic/create">create</a>
           <a href="/topic/update/${sanitizedTitle}">update</a>
           <form action="/topic/delete_process" method="post">
             <input type="hidden" name="id" value="${sanitizedTitle}">
             <input type="submit" value="delete">
           </form>`
-      );
-      response.send(html);
+        );
+        response.send(html);
+      }
     });
 });
 
-app.get('/user/:id', function (req, res, next) {
+// app.get('/user/:id', function (req, res, next) {
   
-  if (req.params.id === '0') next('route') // id가 0이면 다음 라우트 special을 실행
-  else next() //0이 아니면 다음 미들웨어를 실행함 => regular
-}, function (req, res, next) {
-  // send a regular response
-  res.send('regular')
-})
+//   if (req.params.id === '0') next('route') // id가 0이면 다음 라우트 special을 실행
+//   else next() //0이 아니면 다음 미들웨어를 실행함 => regular
+// }, function (req, res, next) {
+//   // send a regular response
+//   res.send('regular')
+// })
 
-// handler for the /user/:id path, which sends a special response
-app.get('/user/:id', function (req, res, next) {
-  res.send('special')
-})
+// // handler for the /user/:id path, which sends a special response
+// app.get('/user/:id', function (req, res, next) {
+//   res.send('special')
+// })
 
+
+//에러처리 라우터 or 미들웨어는  끝에 위치해야함
+app.use((request, response, next) => { 
+  response.status(404).send('Not Found Page');
+});
+
+app.use((err, request, response, next) => {// 에러처리 미들웨어의 약속된 4개의 인자
+  response.status(500).send('Something Broke!');
+});
 
 app.listen(3000);
