@@ -10,6 +10,7 @@ var compression = require('compression')
 var template = require('./lib/template.js');
 var sanitizeHtml = require('sanitize-html');
 
+app.use(express.static('public')); //public 디렉토리를 정적 파일의 root root경로로 지정해줌
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(compression());
@@ -28,7 +29,9 @@ app.get('/', (request, response) => {
     var description = 'Hello, Node.js';
     var list = template.list(request.list);
     var html = template.HTML(title, list,
-      `<h2>${title}</h2>${description}`,
+      `<h2>${title}</h2>${description}
+      <img src='/images/hello.jpg' style="width:50%; display:block; margin:0 auto;">
+      `,
       `<a href="/topic/create">create</a>`);
     response.send(html);
 });
