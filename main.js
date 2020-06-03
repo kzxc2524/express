@@ -1,14 +1,18 @@
 var express = require('express');
 var app = express();
 var fs = require('fs');
-var path = require('path');
-var qs = require('querystring');
+
 var bodyParser = require('body-parser');
 // 넘겨받은 데이터를 처리하는 미들웨어 request.on('data'), request.on('end') 대체
+
 var compression = require('compression')
 //리소스를 압축형태로 만드는 미들웨어
-var template = require('./lib/template.js');
-var sanitizeHtml = require('sanitize-html');
+
+var helmet = require('helmet');
+//자주 일어나는 보안적 문제를 해결해주는 모듈
+//nsp check도 자주 해주면 좋음
+
+app.use(helmet());
 
 var topicRouter = require('./routers/topic.js');
 var homeRouter = require('./routers/home.js');
