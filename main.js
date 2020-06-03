@@ -14,22 +14,28 @@ var sanitizeHtml = require('sanitize-html');
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(compression());
 
-app.get('/', (request, response) => {
+//made middlewear 
+app.get('*', (request, response, next) => { //get 방식으로 들어오는 모든 요청에서 작동 post에서는 작동 X
   fs.readdir('./data', function (error, filelist) {
+    request.list = filelist;
+    next();
+  });
+});
+
+
+app.get('/', (request, response) => {
     var title = 'Welcome';
     var description = 'Hello, Node.js';
-    var list = template.list(filelist);
+    var list = template.list(request.list);
     var html = template.HTML(title, list,
       `<h2>${title}</h2>${description}`,
       `<a href="/topic/create">create</a>`);
     response.send(html);
-  });  
 });
 
 app.get('/topic/create', (request, response)=> {
-  fs.readdir('./data', function (error, filelist) {
     var title = 'WEB - create';
-    var list = template.list(filelist);
+    var list = template.list(request.list);
     var html = template.HTML(title, list, `
       <form action="/topic/create_process" method="post">
         <p><input type="text" name="title" placeholder="title"></p>
@@ -42,11 +48,10 @@ app.get('/topic/create', (request, response)=> {
       </form>
     `, '');
     response.send(html);
-  });
 });
 
 app.post('/topic/create_process', (request, response) => {
-  
+  console.log(request);
   var post = request.body;
   var title = post.title;
   var description = post.description;
@@ -56,11 +61,10 @@ app.post('/topic/create_process', (request, response) => {
 });
 
 app.get('/topic/update/:topicId', (request,response) => {
-  fs.readdir('./data', function (error, filelist) {
     var filteredId = path.parse(request.params.topicId).base;
     fs.readFile(`data/${filteredId}`, 'utf8', function(err, description){
       var title = request.params.topicId;
-      var list = template.list(filelist);
+      var list = template.list(request.list);
       var html = template.HTML(title, list,
         `
         <form action="/topic/update_process" method="post">
@@ -78,7 +82,6 @@ app.get('/topic/update/:topicId', (request,response) => {
       );
       response.send(html);
     });
-  });
 });
 
 app.post('/topic/update_process', (request, response) => {
@@ -103,7 +106,6 @@ app.post('/topic/delete_process', (request,response) => {
 });
 
 app.get('/topic/:topicId', (request, response) => {
-  fs.readdir('./data', function (error, filelist) {
     var filteredId = path.parse(request.params.topicId).base;
     fs.readFile(`data/${filteredId}`, 'utf8', function(err, description){
       var title = request.params.topicId;
@@ -111,7 +113,7 @@ app.get('/topic/:topicId', (request, response) => {
       var sanitizedDescription = sanitizeHtml(description, {
         allowedTags:['h1']
       });
-      var list = template.list(filelist);
+      var list = template.list(request.list);
       var html = template.HTML(sanitizedTitle, list,
         `<h2>${sanitizedTitle}</h2>${sanitizedDescription}`,
         ` <a href="/topic/create">create</a>
@@ -123,7 +125,21 @@ app.get('/topic/:topicId', (request, response) => {
       );
       response.send(html);
     });
-  });
 });
+
+app.get('/user/:id', function (req, res, next) {
+  
+  if (req.params.id === '0') next('route') // id가 0이면 다음 라우트 special을 실행
+  else next() //0이 아니면 다음 미들웨어를 실행함 => regular
+}, function (req, res, next) {
+  // send a regular response
+  res.send('regular')
+})
+
+// handler for the /user/:id path, which sends a special response
+app.get('/user/:id', function (req, res, next) {
+  res.send('special')
+})
+
 
 app.listen(3000);
