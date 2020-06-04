@@ -3,10 +3,13 @@ var router = express.Router();
 var fs = require('fs');
 var path = require('path');
 var template = require('../lib/template.js');
+var log = require('../lib/log.js');
 var sanitizeHtml = require('sanitize-html');
 
 router.get('/create', (request, response) => {
     var title = 'WEB - create';
+    var ownerUse = log(request, response);
+    var logInOut = template.logInOut(ownerUse);
     var list = template.list(request.list);
     var html = template.HTML(title, list, `
       <form action="/topic/create_process" method="post">
@@ -18,12 +21,17 @@ router.get('/create', (request, response) => {
           <input type="submit">
         </p>
       </form>
-    `, '');
+    `, '',
+    logInOut);
     response.send(html);
 });
 
 router.post('/create_process', (request, response) => {
-    console.log(request);
+    var ownerUse = log(request, response);
+    if(ownerUse === false){
+        response.end('Retry after LOGIN!');
+        return false;
+    }
     var post = request.body;
     var title = post.title;
     var description = post.description;
@@ -36,6 +44,8 @@ router.get('/update/:topicId', (request, response) => {
     var filteredId = path.parse(request.params.topicId).base;
     fs.readFile(`data/${filteredId}`, 'utf8', function (err, description) {
         var title = request.params.topicId;
+        var ownerUse = log(request, response);
+        var logInOut = template.logInOut(ownerUse);
         var list = template.list(request.list);
         var html = template.HTML(title, list,
             `
@@ -49,14 +59,19 @@ router.get('/update/:topicId', (request, response) => {
             <input type="submit">
           </p>
         </form>
-        `,
-            ``
+        `,'',
+        logInOut
         );
         response.send(html);
     });
 });
 
 router.post('/update_process', (request, response) => {
+    var ownerUse = log(request, response);
+    if(ownerUse === false){
+        response.end('Retry after LOGIN!');
+        return false;
+    }
     var post = request.body;
     var id = post.id;
     var title = post.title;
@@ -69,6 +84,11 @@ router.post('/update_process', (request, response) => {
 });
 
 router.post('/delete_process', (request, response) => {
+    var ownerUse = log(request, response);
+    if(ownerUse === false){
+        response.end('Retry after LOGIN!');
+        return false;
+    }
     var post = request.body;
     var id = post.id;
     var filteredId = path.parse(id).base;
@@ -84,6 +104,8 @@ router.get('/:topicId', (request, response, next) => {
             next(err); //에러가 있을때 err 데이터를 던져줌
         } else {
             var title = request.params.topicId;
+            var ownerUse = log(request, response);
+            var logInOut = template.logInOut(ownerUse);
             var sanitizedTitle = sanitizeHtml(title);
             var sanitizedDescription = sanitizeHtml(description, {
                 allowedTags: ['h1']
@@ -96,7 +118,8 @@ router.get('/:topicId', (request, response, next) => {
           <form action="/topic/delete_process" method="post">
             <input type="hidden" name="id" value="${sanitizedTitle}">
             <input type="submit" value="delete">
-          </form>`
+          </form>`,
+          logInOut
             );
             response.send(html);
         }

@@ -2,6 +2,11 @@ var express = require('express');
 var app = express();
 var fs = require('fs');
 
+var timeout = require('connect-timeout');
+
+var cookieParser = require('cookie-parser');
+//쿠키 핸들링하는 미들웨어
+
 var bodyParser = require('body-parser');
 // 넘겨받은 데이터를 처리하는 미들웨어 request.on('data'), request.on('end') 대체
 
@@ -16,12 +21,14 @@ app.use(helmet());
 
 var topicRouter = require('./routers/topic.js');
 var homeRouter = require('./routers/home.js');
+var logInOut = require('./routers/logInOut.js');
 
+app.use(cookieParser());
 app.use(express.static('public')); //public 디렉토리를 정적 파일의 root root경로로 지정해줌
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(compression());
-
+app.use(timeout('1s'));
 //made middlewear 
 app.get('*', (request, response, next) => { //get 방식으로 들어오는 모든 요청에서 작동 post에서는 작동 X
   fs.readdir('./data', function (error, filelist) {
@@ -37,6 +44,8 @@ app.get('*', (request, response, next) => { //get 방식으로 들어오는 모�
     next();
   });
 });
+
+app.use('/', logInOut);
 
 app.use('/', homeRouter);
 
