@@ -1,0 +1,5 @@
+#특정 폴더를 ignore
+session
+
+#특정 폴거의 파일만 ignore
+data/test

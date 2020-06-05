@@ -7,10 +7,15 @@ var timeout = require('connect-timeout');
 var cookieParser = require('cookie-parser');
 //쿠키 핸들링하는 미들웨어
 
+var session = require('express-session');
+//세션을 핸들링하는 미들웨어
+var FileStore = require('session-file-store')(session);
+//세션을 파일로 관리하는 별도 모듈
+
 var bodyParser = require('body-parser');
 // 넘겨받은 데이터를 처리하는 미들웨어 request.on('data'), request.on('end') 대체
 
-var compression = require('compression')
+var compression = require('compression');
 //리소스를 압축형태로 만드는 미들웨어
 
 var helmet = require('helmet');
@@ -22,8 +27,16 @@ app.use(helmet());
 var topicRouter = require('./routers/topic.js');
 var homeRouter = require('./routers/home.js');
 var logInOut = require('./routers/logInOut.js');
+var authRouter = require('./routers/auth.js');
 
 app.use(cookieParser());
+app.use(session({
+  secret: 'pantaminum', //외부에 절대 알려지면 안되는 코드
+  resave: false, //세션 데이터 변경 유무에 따라 세션 값을 저장할지, true => 변경유무 상관없이 저장
+  saveUninitialized: true, //세션이 필요하기 전까지 세션을 구동하지 앟는다, false => 필요유무 상관업싱 무조건 작동
+  store: new FileStore()
+}));
+
 app.use(express.static('public')); //public 디렉토리를 정적 파일의 root root경로로 지정해줌
 
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -46,10 +59,11 @@ app.get('*', (request, response, next) => { //get 방식으로 들어오는 모�
 });
 
 app.use('/', logInOut);
-
+app.use('/auth', authRouter);
 app.use('/', homeRouter);
 
 app.use('/topic', topicRouter);
+
 
 // app.get('/user/:id', function (req, res, next) {
   

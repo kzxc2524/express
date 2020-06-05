@@ -8,8 +8,10 @@ var sanitizeHtml = require('sanitize-html');
 
 router.get('/create', (request, response) => {
     var title = 'WEB - create';
-    var ownerUse = log(request, response);
+    var ownerUse = log.cookie(request, response);
+    var authUse = log.session(request, response);
     var logInOut = template.logInOut(ownerUse);
+    var authUI = template.authUI(authUse, request.session.userNick);
     var list = template.list(request.list);
     var html = template.HTML(title, list, `
       <form action="/topic/create_process" method="post">
@@ -22,13 +24,14 @@ router.get('/create', (request, response) => {
         </p>
       </form>
     `, '',
-    logInOut);
+    logInOut, authUI);
     response.send(html);
 });
 
 router.post('/create_process', (request, response) => {
-    var ownerUse = log(request, response);
-    if(ownerUse === false){
+    var ownerUse = log.cookie(request, response);
+    var authUse = log.session(request, response);
+    if (ownerUse === false && authUse === false){
         response.end('Retry after LOGIN!');
         return false;
     }
@@ -44,8 +47,10 @@ router.get('/update/:topicId', (request, response) => {
     var filteredId = path.parse(request.params.topicId).base;
     fs.readFile(`data/${filteredId}`, 'utf8', function (err, description) {
         var title = request.params.topicId;
-        var ownerUse = log(request, response);
+        var ownerUse = log.cookie(request, response);
+        var authUse = log.session(request, response);
         var logInOut = template.logInOut(ownerUse);
+        var authUI = template.authUI(authUse, request.session.userNick);
         var list = template.list(request.list);
         var html = template.HTML(title, list,
             `
@@ -60,15 +65,16 @@ router.get('/update/:topicId', (request, response) => {
           </p>
         </form>
         `,'',
-        logInOut
+        logInOut, authUI
         );
         response.send(html);
     });
 });
 
 router.post('/update_process', (request, response) => {
-    var ownerUse = log(request, response);
-    if(ownerUse === false){
+    var ownerUse = log.cookie(request, response);
+    var authUse = log.session(request, response);
+    if (ownerUse === false && authUse === false) {
         response.end('Retry after LOGIN!');
         return false;
     }
@@ -84,8 +90,9 @@ router.post('/update_process', (request, response) => {
 });
 
 router.post('/delete_process', (request, response) => {
-    var ownerUse = log(request, response);
-    if(ownerUse === false){
+    var ownerUse = log.cookie(request, response);
+    var authUse = log.session(request, response);
+    if (ownerUse === false && authUse === false) {
         response.end('Retry after LOGIN!');
         return false;
     }
@@ -104,8 +111,10 @@ router.get('/:topicId', (request, response, next) => {
             next(err); //에러가 있을때 err 데이터를 던져줌
         } else {
             var title = request.params.topicId;
-            var ownerUse = log(request, response);
+            var ownerUse = log.cookie(request, response);
+            var authUse = log.session(request, response);
             var logInOut = template.logInOut(ownerUse);
+            var authUI = template.authUI(authUse, request.session.userNick);
             var sanitizedTitle = sanitizeHtml(title);
             var sanitizedDescription = sanitizeHtml(description, {
                 allowedTags: ['h1']
@@ -119,7 +128,7 @@ router.get('/:topicId', (request, response, next) => {
             <input type="hidden" name="id" value="${sanitizedTitle}">
             <input type="submit" value="delete">
           </form>`,
-          logInOut
+            logInOut, authUI
             );
             response.send(html);
         }
