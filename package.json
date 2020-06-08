@@ -28,6 +28,8 @@
     "express": "^4.17.1",
     "express-session": "^1.17.1",
     "helmet": "^3.22.0",
+    "passport": "^0.4.1",
+    "passport-local": "^1.0.0",
     "sanitize-html": "^1.18.2",
     "session-file-store": "^1.4.0"
   }

@@ -12,7 +12,7 @@ router.get('/', (request, response) => {
     var ownerUse = log.cookie(request, response);
     var authUse = log.session(request, response);
     var logInOut = template.logInOut(ownerUse);
-    var authUI = template.authUI(authUse, request.session.userNick);
+    var authUI = template.authUI(request, response, authUse);
     var list = template.list(request.list);
     var html = template.HTML(title, list,
         `<h2>${title}</h2>${description}
@@ -20,7 +20,6 @@ router.get('/', (request, response) => {
       `,
         `<a href="/topic/create">create</a>`,
         logInOut, authUI);
-    console.log(authUse);
     response.send(html);
 });
 

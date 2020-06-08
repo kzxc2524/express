@@ -28,29 +28,33 @@ router.get('/login', (request,response)=>{
     response.send(html);
 });
 
-router.post('/login_process', (request, response) => {
-    var post = request.body;
-    var userId = post.userId;
-    var userPw = post.userPw;
-    if (userId == authData.email && userPw == authData.password) {
-        request.session.userAuth = true;
-        request.session.userNick = authData.nickname;
-        request.session.save(()=>{
-            response.redirect(302, '/');
-        });
-        //세션 객체에 있는 데이터를 세션 스토어에 반영하는 작업을 바로 시작하고 작업이 끝나면 콜백 함수 실행
+// router.post('/login_process', (request, response) => {
+//     var post = request.body;
+//     var userId = post.userId;
+//     var userPw = post.userPw;
+//     if (userId == authData.email && userPw == authData.password) {
+//         request.session.userAuth = true;
+//         request.session.userNick = authData.nickname;
+//         request.session.save(()=>{
+//             response.redirect(302, '/');
+//         });
+//         //세션 객체에 있는 데이터를 세션 스토어에 반영하는 작업을 바로 시작하고 작업이 끝나면 콜백 함수 실행
         
-        response.end('Welcome');
-    } else {
-        response.end('Confirm Your Acount')
-    }
-});
+//         response.end('Welcome');
+//     } else {
+//         response.end('Confirm Your Acount')
+//     }
+// });
 
 router.get('/logout_process', (request, response) => {
-    request.session.destroy( (err) => {
-        response.redirect(302, '/');
-        response.end();
-    });    
+    // request.session.destroy( (err) => {
+    //     response.redirect(302, '/');
+    //     response.end();
+    // });
+    request.logout();
+    request.session.save(function(){
+        response.redirect('/');
+    });
 });
 
 

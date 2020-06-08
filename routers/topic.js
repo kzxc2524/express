@@ -11,7 +11,7 @@ router.get('/create', (request, response) => {
     var ownerUse = log.cookie(request, response);
     var authUse = log.session(request, response);
     var logInOut = template.logInOut(ownerUse);
-    var authUI = template.authUI(authUse, request.session.userNick);
+    var authUI = template.authUI(request, response, authUse);
     var list = template.list(request.list);
     var html = template.HTML(title, list, `
       <form action="/topic/create_process" method="post">
@@ -50,7 +50,7 @@ router.get('/update/:topicId', (request, response) => {
         var ownerUse = log.cookie(request, response);
         var authUse = log.session(request, response);
         var logInOut = template.logInOut(ownerUse);
-        var authUI = template.authUI(authUse, request.session.userNick);
+        var authUI = template.authUI(request, response, authUse);
         var list = template.list(request.list);
         var html = template.HTML(title, list,
             `
@@ -114,7 +114,7 @@ router.get('/:topicId', (request, response, next) => {
             var ownerUse = log.cookie(request, response);
             var authUse = log.session(request, response);
             var logInOut = template.logInOut(ownerUse);
-            var authUI = template.authUI(authUse, request.session.userNick);
+            var authUI = template.authUI(request, response, authUse);
             var sanitizedTitle = sanitizeHtml(title);
             var sanitizedDescription = sanitizeHtml(description, {
                 allowedTags: ['h1']
