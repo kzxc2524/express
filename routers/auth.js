@@ -1,21 +1,18 @@
 var express = require('express');
+var app = express();
 var router = express.Router();
 var fs = require('fs');
 var path = require('path');
 var template = require('../lib/template.js');
 var log = require('../lib/log.js');
 var sanitizeHtml = require('sanitize-html');
+var passport = require('../lib/passport.js')(app);
 
 
-
-var authData = {
-    email : 'test2@test.com',
-    password:'12345678',
-    nickname:'test2'
-}
 
 router.get('/login', (request,response)=>{
   var fmsg = request.flash();
+  console.log(fmsg);
   var feedback = '';
   if (fmsg.error){
     feedback = `<p style="color:red;">${fmsg.error[0]}</p>`;
@@ -34,6 +31,18 @@ router.get('/login', (request,response)=>{
   response.send(html);
 });
 
+//passport
+router.post('/login_process',
+  passport.authenticate('local', {
+    successRedirect: '/',
+    failureRedirect: '/auth/login',
+    failureFlash: true, // 실패시 메세지
+    successFlash: true  // 성공시 메세지
+  })
+);
+
+
+//express session
 // router.post('/login_process', (request, response) => {
 //     var post = request.body;
 //     var userId = post.userId;
