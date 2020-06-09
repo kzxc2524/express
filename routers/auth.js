@@ -15,17 +15,23 @@ var authData = {
 }
 
 router.get('/login', (request,response)=>{
-    var title = 'Session Login';
-    var list = template.list(request.list);
-    var html = template.HTML(title, list, `
-      <h2>${title}</h2>
-      <form action="/auth/login_process" method="post">
-        <p><input type="email" name="userId" placeholder="userid@example.com" required /></p>
-        <p><input type="password" name="userPw" required /></p>
-        <p><input type="submit" value="Login" /></p>
-      </form>
-    `, '', '', '');
-    response.send(html);
+  var fmsg = request.flash();
+  var feedback = '';
+  if (fmsg.error){
+    feedback = `<p style="color:red;">${fmsg.error[0]}</p>`;
+  }
+  var title = 'Session Login';
+  var list = template.list(request.list);
+  var html = template.HTML(title, list, `
+    <h2>${title}</h2>
+    <form action="/auth/login_process" method="post">
+      <p><input type="email" name="userId" placeholder="userid@example.com" required /></p>
+      <p><input type="password" name="userPw" required /></p>
+      ${feedback}
+      <p><input type="submit" value="Login" /></p>
+    </form>
+  `, '', '', '');
+  response.send(html);
 });
 
 // router.post('/login_process', (request, response) => {

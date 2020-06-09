@@ -70,9 +70,12 @@ var authData = {
 var passport = require('passport')
   , LocalStrategy = require('passport-local').Strategy;
     //로컬방식(아이디와 비번을 이용하는 방식)으로 로그인하는 전략
+var flash = require('connect-flash');
 
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(flash());//내부적으로 세션을 사용하기 때문에 반드시 세션 다음에 와야함
+
 
 passport.serializeUser(function (user, done) {
   console.log('serializeUser', user);
@@ -104,7 +107,9 @@ passport.use(new LocalStrategy({
 app.post('/auth/login_process',
   passport.authenticate('local', {
     successRedirect: '/',
-    failureRedirect: '/auth/login'
+    failureRedirect: '/auth/login',
+    failureFlash: true, // 실패시 메세지
+    successFlash: true  // 성공시 메세지
   })
 );
 
