@@ -8,6 +8,58 @@ var log = require('../lib/log.js');
 var sanitizeHtml = require('sanitize-html');
 var passport = require('../lib/passport.js')(app);
 
+var db = require('../lib/db.js')
+
+const shortid = require('shortid');
+
+router.get('/regist', (request, response) => {
+  var fmsg = request.flash();
+  console.log(fmsg);
+  var feedback = '';
+  if (fmsg.error) {
+    feedback = `<p style="color:red;">${fmsg.error[0]}</p>`;
+  }
+  var title = 'User Regist';
+  var list = template.list(request.list);
+  var html = template.HTML(title, list, `
+    <h2>${title}</h2>
+    <form action="/auth/regist_process" method="post">
+      <p>E-mail<br><input type="email" name="userId" placeholder="user@example.com" required /></p>
+      <p>Password<br><input type="password" name="userPw" required /></p>
+      <p>Password Check<br><input type="password" name="userPw2" required /></p>
+      <p>Nick Name<br><input type="text" name="nickId"></p>
+      ${feedback}
+      <p><input type="submit" value="Join" /></p>
+    </form>
+  `, '', '', '');
+  response.send(html);
+});
+
+router.post('/regist_process', (request, response) => {
+  var post = request.body;
+  var userId = post.userId;
+  var userPw = post.userPw;
+  var userPw2 = post.userPw2;
+  var nickId = post.nickId;
+ 
+  if (userPw == userPw2){
+    var user = {
+      id: shortid.generate(),
+      email: userId,
+      password: userPw,
+      nickName: nickId
+    }
+    db.get('users').push(user).write();
+    
+      return response.redirect('/');
+    
+  }else{
+    request.flash('error',"Password must same!");
+    response.redirect('/auth/regist');
+  }
+  
+});
+
 
 
 router.get('/login', (request,response)=>{
